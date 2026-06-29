@@ -21,15 +21,24 @@
 
       <p id="shareStatus" class="share-status" role="status" aria-live="polite"></p>
 
+      <div class="color-tools" aria-label="文字色">
+        <button class="color-button" type="button" data-color="#1d2430" style="--swatch:#1d2430" aria-label="黒"></button>
+        <button class="color-button" type="button" data-color="#d23f31" style="--swatch:#d23f31" aria-label="赤"></button>
+        <button class="color-button" type="button" data-color="#2368c4" style="--swatch:#2368c4" aria-label="青"></button>
+        <button class="color-button" type="button" data-color="#248052" style="--swatch:#248052" aria-label="緑"></button>
+        <button class="color-button" type="button" data-color="#b7791f" style="--swatch:#b7791f" aria-label="黄"></button>
+        <button class="color-button" type="button" data-color="#7c4dbe" style="--swatch:#7c4dbe" aria-label="紫"></button>
+      </div>
+
       <section class="notes" aria-label="左右独立メモ">
         <article class="note-panel">
-          <label for="leftNote">左段</label>
-          <textarea id="leftNote" spellcheck="false" placeholder="左側のメモ"></textarea>
+          <label id="leftNoteLabel" for="leftNote">左段</label>
+          <div id="leftNote" class="editor" contenteditable="true" spellcheck="false" role="textbox" aria-labelledby="leftNoteLabel" data-placeholder="左側のメモ"></div>
         </article>
 
         <article class="note-panel">
-          <label for="rightNote">右段</label>
-          <textarea id="rightNote" spellcheck="false" placeholder="右側のメモ"></textarea>
+          <label id="rightNoteLabel" for="rightNote">右段</label>
+          <div id="rightNote" class="editor" contenteditable="true" spellcheck="false" role="textbox" aria-labelledby="rightNoteLabel" data-placeholder="右側のメモ"></div>
         </article>
       </section>
     </main>

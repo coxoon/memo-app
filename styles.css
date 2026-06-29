@@ -23,7 +23,7 @@ body {
 
 .app {
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr;
   gap: 12px;
   height: 100vh;
   padding: 14px;
@@ -70,6 +70,33 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+.color-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.color-button {
+  width: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  border-color: var(--line);
+  background: var(--panel);
+  padding: 0;
+}
+
+.color-button::before {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: auto;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 50%;
+  background: var(--swatch);
+  content: "";
+}
+
 .sync-toggle {
   display: inline-flex;
   align-items: center;
@@ -114,11 +141,10 @@ button:focus-visible {
   font-weight: 700;
 }
 
-textarea {
+.editor {
   width: 100%;
   min-width: 0;
   min-height: 0;
-  resize: none;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -127,9 +153,17 @@ textarea {
   font: 16px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   outline: none;
   overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-textarea:focus {
+.editor:empty::before {
+  color: #8b98aa;
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.editor:focus {
   border-color: var(--focus);
   box-shadow: 0 0 0 3px rgba(208, 123, 45, 0.16);
 }

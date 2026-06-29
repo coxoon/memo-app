@@ -6,6 +6,8 @@ const syncScroll = document.querySelector("#syncScroll");
 const syncLabel = document.querySelector("#syncLabel");
 const shareButton = document.querySelector("#shareButton");
 const shareStatus = document.querySelector("#shareStatus");
+const colorButtons = document.querySelectorAll(".color-button");
+const editors = [leftNote, rightNote];
 
 const defaultState = {
   left: "",
@@ -15,6 +17,7 @@ const defaultState = {
 
 let isSyncingScroll = false;
 let statusTimer;
+let activeEditor = leftNote;
 
 function loadState() {
   try {
@@ -26,8 +29,8 @@ function loadState() {
 
 function saveState() {
   const state = {
-    left: leftNote.value,
-    right: rightNote.value,
+    left: leftNote.innerHTML,
+    right: rightNote.innerHTML,
     sync: syncScroll.checked
   };
 
@@ -36,8 +39,8 @@ function saveState() {
 
 function currentState() {
   return {
-    left: leftNote.value,
-    right: rightNote.value,
+    left: leftNote.innerHTML,
+    right: rightNote.innerHTML,
     sync: syncScroll.checked
   };
 }
@@ -74,9 +77,78 @@ function decodeShareData(value) {
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 
+function looksLikeHtml(value) {
+  return /<[a-z][\s\S]*>/i.test(value);
+}
+
+function cleanHtml(value) {
+  const template = document.createElement("template");
+  template.innerHTML = value;
+  const allowedColors = new Map([
+    ["#1d2430", "#1d2430"],
+    ["rgb(29, 36, 48)", "#1d2430"],
+    ["#d23f31", "#d23f31"],
+    ["rgb(210, 63, 49)", "#d23f31"],
+    ["#2368c4", "#2368c4"],
+    ["rgb(35, 104, 196)", "#2368c4"],
+    ["#248052", "#248052"],
+    ["rgb(36, 128, 82)", "#248052"],
+    ["#b7791f", "#b7791f"],
+    ["rgb(183, 121, 31)", "#b7791f"],
+    ["#7c4dbe", "#7c4dbe"],
+    ["rgb(124, 77, 190)", "#7c4dbe"]
+  ]);
+
+  template.content.querySelectorAll("*").forEach((element) => {
+    if (element.tagName === "FONT") {
+      const span = document.createElement("span");
+      const color = allowedColors.get((element.getAttribute("color") || element.style.color).toLowerCase());
+
+      if (color) {
+        span.style.color = color;
+      }
+
+      span.append(...element.childNodes);
+      element.replaceWith(span);
+      return;
+    }
+
+    if (element.tagName !== "SPAN" && element.tagName !== "DIV" && element.tagName !== "BR") {
+      element.replaceWith(...element.childNodes);
+      return;
+    }
+
+    [...element.attributes].forEach((attribute) => {
+      if (attribute.name !== "style") {
+        element.removeAttribute(attribute.name);
+      }
+    });
+
+    const color = allowedColors.get(element.style.color.toLowerCase());
+    element.removeAttribute("style");
+
+    if (color) {
+      element.style.color = color;
+    }
+  });
+
+  return template.innerHTML;
+}
+
+function setEditorContent(editor, value) {
+  const content = typeof value === "string" ? value : "";
+
+  if (looksLikeHtml(content)) {
+    editor.innerHTML = cleanHtml(content);
+    return;
+  }
+
+  editor.textContent = content;
+}
+
 function applyState(state) {
-  leftNote.value = typeof state.left === "string" ? state.left : "";
-  rightNote.value = typeof state.right === "string" ? state.right : "";
+  setEditorContent(leftNote, state.left);
+  setEditorContent(rightNote, state.right);
   syncScroll.checked = state.sync !== false;
   updateSyncLabel();
   saveState();
@@ -153,18 +225,35 @@ function restoreState() {
   applyState(state);
 }
 
+function applyTextColor(color) {
+  activeEditor.focus();
+  document.execCommand("foreColor", false, color);
+  saveState();
+}
+
 if (!restoreSharedState()) {
   restoreState();
 }
 
-leftNote.addEventListener("input", saveState);
-rightNote.addEventListener("input", saveState);
+editors.forEach((editor) => {
+  editor.addEventListener("focus", () => {
+    activeEditor = editor;
+  });
+  editor.addEventListener("input", saveState);
+});
 syncScroll.addEventListener("change", () => {
   updateSyncLabel();
   saveState();
 });
 shareButton.addEventListener("click", copyShareLink);
 window.addEventListener("hashchange", restoreSharedState);
+
+colorButtons.forEach((button) => {
+  button.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+  });
+  button.addEventListener("click", () => applyTextColor(button.dataset.color));
+});
 
 leftNote.addEventListener("scroll", () => applyLinkedScroll(leftNote, rightNote));
 rightNote.addEventListener("scroll", () => applyLinkedScroll(rightNote, leftNote));
