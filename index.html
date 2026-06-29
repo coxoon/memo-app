@@ -10,11 +10,16 @@
     <main class="app">
       <header class="toolbar">
         <h1>2段メモ帳</h1>
-        <label class="sync-toggle">
-          <input id="syncScroll" type="checkbox" checked>
-          <span id="syncLabel">スクロール連動</span>
-        </label>
+        <div class="toolbar-actions">
+          <button id="shareButton" type="button">共有リンクコピー</button>
+          <label class="sync-toggle">
+            <input id="syncScroll" type="checkbox" checked>
+            <span id="syncLabel">スクロール連動</span>
+          </label>
+        </div>
       </header>
+
+      <p id="shareStatus" class="share-status" role="status" aria-live="polite"></p>
 
       <section class="notes" aria-label="左右独立メモ">
         <article class="note-panel">
