@@ -202,6 +202,35 @@ function restoreSharedState() {
   }
 }
 
+async function restoreDocumentState() {
+  const params = new URLSearchParams(window.location.search);
+  const documentName = params.get("doc");
+
+  if (!documentName) {
+    return false;
+  }
+
+  if (!/^[a-z0-9-]+$/i.test(documentName)) {
+    showStatus("共有データ名が正しくありません");
+    return false;
+  }
+
+  try {
+    const response = await fetch(`shared/${documentName}.json`, { cache: "no-store" });
+
+    if (!response.ok) {
+      throw new Error("Document not found");
+    }
+
+    applyState(await response.json());
+    showStatus("共有データを読み込みました");
+    return true;
+  } catch {
+    showStatus("共有データを読み込めませんでした");
+    return false;
+  }
+}
+
 function scrollRatio(source) {
   const maxScroll = source.scrollHeight - source.clientHeight;
   return maxScroll <= 0 ? 0 : source.scrollTop / maxScroll;
@@ -231,9 +260,19 @@ function applyTextColor(color) {
   saveState();
 }
 
-if (!restoreSharedState()) {
+async function initialize() {
+  if (restoreSharedState()) {
+    return;
+  }
+
+  if (await restoreDocumentState()) {
+    return;
+  }
+
   restoreState();
 }
+
+initialize();
 
 editors.forEach((editor) => {
   editor.addEventListener("focus", () => {
