@@ -1,4 +1,4 @@
-const STORAGE_KEY = "dual-notepad.v1";
+const STORAGE_KEY = "dual-notepad.v2";
 
 const leftNote = document.querySelector("#leftNote");
 const rightNote = document.querySelector("#rightNote");
@@ -146,12 +146,17 @@ function setEditorContent(editor, value) {
   editor.textContent = content;
 }
 
-function applyState(state) {
+function applyState(state, options = {}) {
+  const shouldSave = options.save !== false;
+
   setEditorContent(leftNote, state.left);
   setEditorContent(rightNote, state.right);
   syncScroll.checked = state.sync !== false;
   updateSyncLabel();
-  saveState();
+
+  if (shouldSave) {
+    saveState();
+  }
 }
 
 function shareUrl() {
@@ -193,7 +198,7 @@ function restoreSharedState() {
   }
 
   try {
-    applyState(decodeShareData(sharedValue));
+    applyState(decodeShareData(sharedValue), { save: false });
     showStatus("共有リンクの内容を読み込みました");
     return true;
   } catch {
@@ -222,7 +227,7 @@ async function restoreDocumentState() {
       throw new Error("Document not found");
     }
 
-    applyState(await response.json());
+    applyState(await response.json(), { save: false });
     showStatus("共有データを読み込みました");
     return true;
   } catch {
